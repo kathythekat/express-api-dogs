@@ -10,7 +10,7 @@ router.post("/", async function (req, res) {
     `
   INSERT INTO dogs (name, breed, age)
   VALUES ($1, $2, $3)
-  RETURNING id, name, breed, age`,
+  RETURNING name, name, breed, age`,
     [name, breed, age]
   );
   const newDog = results.rows[0];
@@ -24,45 +24,48 @@ router.get("/", async function (req, res) {
   return res.json({ dogs });
 });
 
-//GET dog by id
-router.get("/:id", async function (req, res, next) {
-  const name = req.params.id;
-  const results = await db.query(`SELECT * FROM dogs WHERE id = $1`, [name]);
-  const dog = results.rows;
-  if (!dog.length) {
+//GET dog by name
+router.get("/:name", async function (req, res, next) {
+  const name = req.params.name.toUpperCase();
+  const results = await db.query(`SELECT * FROM dogs WHERE upper(name) = $1`, [
+    name,
+  ]);
+  const dog = results.rows[0];
+  if (!dog) {
     return next(new NotFoundError());
   }
   return res.json({ dog });
 });
 
-//UPDATE dog
-router.patch("/:id", async function (req, res) {
-  const id = req.params.id;
+//UPDATE dog's name
+router.patch("/:name", async function (req, res) {
+  const prevName = req.params.name.toUpperCase();
   const { name } = req.body;
   const results = await db.query(
     `UPDATE dogs
     SET name = $1
-    WHERE id = $2
+    WHERE upper(name) = $2
     RETURNING name`,
-    [name, id]
+    [name, prevName]
   );
   const updatedDog = results.rows[0].name;
   return res.json({ updated: updatedDog });
 });
 
 //DELETE dog
-router.delete("/:id", async function (req, res, next) {
-  const id = req.params.id;
+router.delete("/:name", async function (req, res, next) {
+  const name = req.params.name.toUpperCase();
   const results = await db.query(
     `DELETE FROM dogs
-    WHERE id = $1
+    WHERE upper(name) = $1
     RETURNING name`,
-    [id]
+    [name]
   );
+  console.log(results.rows);
   if (!results.rowCount) {
     return next(new NotFoundError());
   }
-  return res.json({ deleted: results.rows });
+  return res.json({ deleted: results.rows[0].name });
 });
 
 module.exports = router;

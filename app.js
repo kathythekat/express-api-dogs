@@ -19,6 +19,6 @@ app.use(function (err, req, res, next) {
   return res.status(status).json({ error: { message, status } });
 });
 
-app.listen(3000, console.log("Started on http://localhost://3000"));
+app.listen(3001, console.log("Started on http://localhost://3001"));
 
 module.exports = app;
