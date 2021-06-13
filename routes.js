@@ -3,22 +3,7 @@ const db = require("./db");
 const router = new express.Router();
 const { NotFoundError } = require("./errorHandling");
 
-router.get("/", async function (req, res) {
-  const results = await db.query(`SELECT * FROM dogs`);
-  const dogs = results.rows;
-  return res.json({ dogs });
-});
-
-router.get("/:id", async function (req, res, next) {
-  const name = req.params.id;
-  const results = await db.query(`SELECT * FROM dogs WHERE id = $1`, [name]);
-  const dog = results.rows;
-  if (!dog.length) {
-    return next(new NotFoundError());
-  }
-  return res.json({ dog });
-});
-
+//CREATE a dog
 router.post("/", async function (req, res) {
   const { name, breed, age } = req.body;
   const results = await db.query(
@@ -32,6 +17,25 @@ router.post("/", async function (req, res) {
   return res.json({ added: newDog });
 });
 
+//GET list of dogs
+router.get("/", async function (req, res) {
+  const results = await db.query(`SELECT * FROM dogs`);
+  const dogs = results.rows;
+  return res.json({ dogs });
+});
+
+//GET dog by id
+router.get("/:id", async function (req, res, next) {
+  const name = req.params.id;
+  const results = await db.query(`SELECT * FROM dogs WHERE id = $1`, [name]);
+  const dog = results.rows;
+  if (!dog.length) {
+    return next(new NotFoundError());
+  }
+  return res.json({ dog });
+});
+
+//UPDATE dog
 router.patch("/:id", async function (req, res) {
   const id = req.params.id;
   const { name } = req.body;
@@ -46,6 +50,7 @@ router.patch("/:id", async function (req, res) {
   return res.json({ updated: updatedDog });
 });
 
+//DELETE dog
 router.delete("/:id", async function (req, res, next) {
   const id = req.params.id;
   const results = await db.query(
