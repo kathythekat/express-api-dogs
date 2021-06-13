@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "express": "^5.0.0-alpha.8",
+    "pg": "^8.6.0"
+  },
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "name": "express-api",
+  "version": "1.0.0",
+  "main": "app.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
