@@ -9,5 +9,6 @@ CREATE TABLE dogs (
   id SERIAL PRIMARY KEY,
   name VARCHAR(25) NOT NULL,
   breed VARCHAR(25) NOT NULL,
-  age NUMERIC NOT NULL
+  age NUMERIC NOT NULL,
+  birth_date timestamp default current_date
 );

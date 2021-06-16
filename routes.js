@@ -3,14 +3,14 @@ const db = require("./db");
 const router = new express.Router();
 const { NotFoundError } = require("./errorHandling");
 
-//CREATE a dog
+//CREATE a new dog
 router.post("/", async function (req, res) {
   const { name, breed, age } = req.body;
   const results = await db.query(
     `
   INSERT INTO dogs (name, breed, age)
   VALUES ($1, $2, $3)
-  RETURNING name, name, breed, age`,
+  RETURNING name, breed, age`,
     [name, breed, age]
   );
   const newDog = results.rows[0];

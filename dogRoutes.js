@@ -1,36 +1,28 @@
 const express = require("express");
-const db = require("./dogDB");
+const db = require("./dogFakeDB");
+const {
+  getDogArray,
+  addDog,
+  updateDog,
+  deleteDog,
+} = require("./dogFileFunctions");
 const router = new express.Router();
 const { NotFoundError, BadRequestError } = require("./errorHandling");
 
 /**
- * GET dogs
- * get list of dogs
- */
-router.get("/", function (req, res) {
-  console.log(req.headers);
-  return res.json({ dogs: db.dogData });
-});
-
-/**
- * POST dogs
+ * CREATE a new dog
  * @param {id, name, breed, age}
  * @returns {woof: {{id, name, breed, age}}
  */
 router.post("/", function (req, res) {
-  if (req.body.name || req.body.breed || req.body.age) {
+  if (!req.body.name || !req.body.breed || !req.body.age) {
     throw new BadRequestError("Must include name, breed, and age");
   }
-  db.dogData.push({
-    id: req.body.id,
-    name: req.body.name,
-    breed: req.body.breed,
-    age: req.body.age,
-  });
+  const { name, breed, age } = req.body;
+  addDog({ name, breed, age });
 
   return res.json({
-    woof: {
-      id: req.body.id,
+    added: {
       name: req.body.name,
       breed: req.body.breed,
       age: req.body.age,
@@ -39,12 +31,25 @@ router.post("/", function (req, res) {
 });
 
 /**
+ * GET dogs
+ * get list of dogs
+ */
+router.get("/", async function (req, res) {
+  const dogs = await getDogArray();
+  console.log(dogs);
+  return res.json({ dogs });
+});
+
+/**
  * GET dog by name
+ * @param req.params.name
+ * @returns {name, breed, age}
  */
 
-router.get("/:id", function (req, res, next) {
-  const dogName = Number(req.params.id);
-  const dogMatch = db.dogData.find((dog) => dog.id === dogName);
+router.get("/:name", async function (req, res, next) {
+  const dogs = await getDogArray();
+  const dogName = req.params.name;
+  const dogMatch = dogs.find((dog) => dog.name === dogName);
   if (dogMatch === undefined) {
     throw new NotFoundError();
   }
@@ -55,14 +60,15 @@ router.get("/:id", function (req, res, next) {
  * PATCH update dog's name
  */
 
-router.patch("/:name", function (req, res) {
+router.patch("/:name", async function (req, res) {
+  const dogs = await getDogArray();
   const prevName = req.params.name;
   const newName = req.body.name;
-  const matchingIdx = db.dogData.findIndex((dog) => dog.name === prevName);
+  const matchingIdx = dogs.findIndex((dog) => dog.name === prevName);
   if (matchingIdx === -1) {
     throw new NotFoundError();
   }
-  db.dogData[matchingIdx].name = newName;
+  updateDog(matchingIdx, newName);
   return res.json({
     updated: { name: newName },
   });
@@ -71,13 +77,14 @@ router.patch("/:name", function (req, res) {
 /**
  * DELETE dog
  */
-router.delete("/:name", function (req, res) {
+router.delete("/:name", async function (req, res) {
+  const dogs = await getDogArray();
   const name = req.params.name;
-  const idxToDelete = db.dogData.findIndex((dog) => dog.name === name);
+  const idxToDelete = dogs.findIndex((dog) => dog.name === name);
   if (idxToDelete === -1) {
     throw new NotFoundError();
   }
-  db.dogData.splice(idxToDelete, 1);
+  deleteDog(idxToDelete);
   return res.json({
     deleted: { name },
   });
